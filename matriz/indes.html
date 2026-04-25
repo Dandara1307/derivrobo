@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🚀 DERIV PRO TRADER - AUTO TRADE | Dandara Silva</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #0a0e1a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            gap: 0;
+            padding: 12px;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f1a2e, #0a0f1a);
+            border-radius: 16px;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .robot-icon {
+            font-size: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 0 #2ecc71; }
+            50% { transform: scale(1.05); text-shadow: 0 0 15px #2ecc71; }
+        }
+
+        .logo-text h1 {
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #fff, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.65rem;
+            opacity: 0.7;
+        }
+
+        .status-panel {
+            display: flex;
+            gap: 15px;
+            background: rgba(0,0,0,0.4);
+            padding: 5px 15px;
+            border-radius: 30px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .led-green {
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #2ecc71;
+            animation: blink 1s infinite;
+        }
+
+        .led-red {
+            width: 10px;
+            height: 10px;
+            background: #e74c3c;
+            border-radius: 50%;
+        }
+
+        .led-yellow {
+            width: 10px;
+            height: 10px;
+            background: #f39c12;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 12px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .left-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .right-column {
+            width: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        .chart-area {
+            background: #0d1222;
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+            flex: 2;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(46,204,113,0.2);
+            flex-shrink: 0;
+        }
+
+        .price-info {
+            font-family: monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .stat-card {
+            background: #0d1222;
+            border-radius: 14px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: #2ecc71;
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .stat-value.win { color: #2ecc71; }
+        .stat-value.loss { color: #e74c3c; }
+        .stat-value.profit { color: #f39c12; }
+
+        .control-panel {
+            background: #0d1222;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+
+        .control-panel h3 {
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .log-panel {
+            background: #0d1222;
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+
+        .log-panel h3 {
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .log-content {
+            height: 120px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.7rem;
+        }
+
+        .log-line {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            gap: 8px;
+        }
+
+        .log-time { color: #2ecc71; min-width: 65px; }
+
+        .footer {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.6);
+            margin-top: 12px;
+            flex-shrink: 0;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-bottom: 4px;
+            color: #ffffff;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            background: #1a1f2e;
+            border: 1px solid #2a2f3e;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 0.85rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2ecc71;
+        }
+
+        button {
+            padding: 10px;
+            background: linear-gradient(95deg, #2ecc71, #27ae60);
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 3px 12px rgba(46,204,113,0.3);
+        }
+
+        .robot-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-start { background: linear-gradient(95deg, #2ecc71, #27ae60); flex: 1; }
+        .btn-stop { background: linear-gradient(95deg, #e74c3c, #c0392b); flex: 1; }
+        .btn-start:disabled, .btn-stop:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .account-type {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .account-btn {
+            flex: 1;
+            padding: 8px;
+            background: #1a1f2e;
+            border: 1px solid #2a2f3e;
+            font-size: 0.8rem;
+        }
+
+        .account-btn.active {
+            background: #2ecc71;
+            border-color: #2ecc71;
+            color: #ffffff;
+        }
+
+        .signal-indicator {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+            font-size: 0.8rem;
+            color: #ffffff;
+        }
+
+        .signal-call {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            display: block;
+            animation: pulse-bg 0.8s infinite;
+            color: #ffffff;
+        }
+
+        .signal-put {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            display: block;
+            animation: pulse-bg 0.8s infinite;
+            color: #ffffff;
+        }
+
+        @keyframes pulse-bg {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .duration-hint {
+            font-size: 0.6rem;
+            opacity: 0.6;
+            margin-top: 3px;
+            color: #ffffff;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #1a1f2e; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #2ecc71; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="logo-area">
+            <div class="robot-icon">🚀</div>
+            <div class="logo-text">
+                <h1>DERIV PRO TRADER</h1>
+                <p>Auto Trade | 1 Minuto | Dandara Silva</p>
+            </div>
+        </div>
+        <div class="status-panel">
+            <div class="status-item"><div id="conn-led" class="led-red"></div><span id="conn-status" style="color:#fff;">Offline</span></div>
+            <div class="status-item"><div id="robot-led" class="led-red"></div><span id="trade-status" style="color:#fff;">Parado</span></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="left-column">
+            <div class="chart-area">
+                <div class="chart-header">
+                    <span style="color:#fff;"><i class="fas fa-chart-line"></i> Gráfico em Tempo Real</span>
+                    <div class="price-info">
+                        <span id="current-price-val" style="color:#fff;">---</span>
+                        <span id="price-change-val" style="font-size: 0.7rem;"></span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="deriv-chart"></canvas>
+                </div>
+                <div id="signal-indicator" class="signal-indicator"></div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-label">✅ VITÓRIAS</div>
+                    <div class="stat-value win" id="wins-count">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">❌ PERDAS</div>
+                    <div class="stat-value loss" id="losses-count">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">📊 WIN RATE</div>
+                    <div class="stat-value" id="winrate-val" style="color:#fff;">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">💰 LUCRO</div>
+                    <div class="stat-value profit" id="profit-val">$0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="control-panel">
+                <h3><i class="fas fa-sliders-h"></i> Configurações</h3>
+                
+                <div class="account-type">
+                    <button id="demo-btn" class="account-btn active">📊 CONTA DEMO</button>
+                    <button id="real-btn" class="account-btn">💰 CONTA REAL</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔑 API TOKEN (com permissão de TRADE)</label>
+                    <input type="password" id="api-token" placeholder="Cole seu token da API">
+                </div>
+                
+                <div class="form-group">
+                    <label>💰 INVESTIMENTO (USD)</label>
+                    <input type="number" id="stake" value="1" step="0.5" min="0.5">
+                </div>
+                
+                <div class="form-group">
+                    <label>⏱️ DURAÇÃO</label>
+                    <select id="duration">
+                        <option value="1m" selected>🕐 1 MINUTO (Recomendado)</option>
+                        <option value="30s">⚡ 30 Segundos</option>
+                        <option value="2m">🕑 2 Minutos</option>
+                        <option value="5m">🕔 5 Minutos</option>
+                    </select>
+                    <div class="duration-hint"><i class="fas fa-bolt"></i> 1 minuto = melhor equilíbrio</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📈 MERCADO</label>
+                    <select id="market">
+                        <option value="R_10">Volatility 10</option>
+                        <option value="R_25">Volatility 25</option>
+                        <option value="R_50">Volatility 50</option>
+                        <option value="R_75">Volatility 75</option>
+                        <option value="R_100" selected>Volatility 100 (Melhor payout)</option>
+                    </select>
+                </div>
+                
+                <button id="connect-btn"><i class="fas fa-plug"></i> CONECTAR À DERIV</button>
+                
+                <div class="robot-controls">
+                    <button id="start-robot-btn" class="btn-start" disabled><i class="fas fa-play"></i> LIGAR ROBÔ</button>
+                    <button id="stop-robot-btn" class="btn-stop" disabled><i class="fas fa-stop"></i> DESLIGAR</button>
+                </div>
+            </div>
+
+            <div class="log-panel">
+                <h3><i class="fas fa-terminal"></i> LOG DO SISTEMA</h3>
+                <div class="log-content" id="log-content">
+                    <div class="log-line"><span class="log-time">--:--:--</span> <span style="color:#fff;">Aguardando conexão...</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <i class="fas fa-copyright"></i> Dandara Silva 2026 - Robô Trader Automático | Todos os direitos reservados
+    </div>
+</div>
+
+<script>
+    // ============================================
+    // CONFIGURAÇÕES GLOBAIS
+    // ============================================
+    let ws = null;
+    let token = "";
+    let accountType = "demo";
+    let isConnected = false;
+    let robotEnabled = false;
+    let isProcessing = false;
+    
+    let balance = 0;
+    let initialBalance = 0;
+    let totalProfit = 0;
+    let wins = 0;
+    let losses = 0;
+    
+    let stake = 1;
+    let symbol = "R_100";
+    let durationValue = 1;
+    let durationUnit = "m";
+    let durationDisplay = "1min";
+    
+    let priceHistory = [];
+    let priceChart = null;
+    let lastTradeTime = 0;
+    let activeContracts = {};
+    let profitHistory = [0];
+    
+    const TARGET_WINS = 10;
+    const TARGET_LOSS = 1;
+    const DERIV_WS_URL = "wss://ws.binaryws.com/websockets/v3?app_id=84598";
+    
+    const $ = id => document.getElementById(id);
+    
+    // ============================================
+    // FUNÇÕES AUXILIARES
+    // ============================================
+    function formatTime() {
+        return new Date().toLocaleTimeString('pt-BR');
+    }
+    
+    function round2(x) {
+        return Math.round(x * 100) / 100;
+    }
+    
+    function log(message, type = "info") {
+        const logContent = $("log-content");
+        if (!logContent) return;
+        
+        if (logContent.innerHTML.includes("Aguardando")) {
+            logContent.innerHTML = "";
+        }
+        
+        const div = document.createElement("div");
+        div.className = "log-line";
+        let color = "#3498db";
+        if (type === 'win') color = "#2ecc71";
+        if (type === 'loss') color = "#e74c3c";
+        if (type === 'signal') color = "#f39c12";
+        if (type === 'trade') color = "#9b59b6";
+        div.innerHTML = `<span class="log-time">${formatTime()}</span><span style="color: ${color}">${message}</span>`;
+        logContent.prepend(div);
+        
+        while (logContent.children.length > 50) {
+            logContent.removeChild(logContent.lastChild);
+        }
+    }
+    
+    function updateUI() {
+        $("wins-count").innerText = wins;
+        $("losses-count").innerText = losses;
+        
+        const total = wins + losses;
+        const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : 0;
+        $("winrate-val").innerHTML = `${winRate}%`;
+        
+        const profitElement = $("profit-val");
+        profitElement.innerHTML = totalProfit >= 0 ? `+$${totalProfit.toFixed(2)}` : `-$${Math.abs(totalProfit).toFixed(2)}`;
+        profitElement.style.color = totalProfit >= 0 ? "#2ecc71" : "#e74c3c";
+        
+        if (priceChart) {
+            profitHistory.push(totalProfit);
+            if (profitHistory.length > 50) profitHistory.shift();
+            
+            const lineColor = totalProfit >= 0 ? "#2ecc71" : "#e74c3c";
+            const bgColor = totalProfit >= 0 ? "rgba(46, 204, 113, 0.15)" : "rgba(231, 76, 60, 0.15)";
+            
+            priceChart.data.datasets[0].borderColor = lineColor;
+            priceChart.data.datasets[0].backgroundColor = bgColor;
+            priceChart.data.datasets[0].data = [...profitHistory];
+            priceChart.update();
+        }
+        
+        if (wins >= TARGET_WINS && robotEnabled) {
+            log(`🎉 META ATINGIDA! ${wins} vitórias!`, "win");
+            disableRobot();
+        }
+        if (losses >= TARGET_LOSS && wins < TARGET_WINS && robotEnabled) {
+            log(`🛑 Limite de ${TARGET_LOSS} derrota atingido! Parando...`, "loss");
+            disableRobot();
+        }
+    }
+    
+    function showSignal(signalType, confidence, rsi) {
+        const indicator = $("signal-indicator");
+        if (!indicator) return;
+        
+        indicator.className = `signal-indicator signal-${signalType.toLowerCase()}`;
+        indicator.innerHTML = `${signalType === "CALL" ? "📈 SINAL DE COMPRA DETECTADO!" : "📉 SINAL DE VENDA DETECTADO!"}<br>Confiança: ${(confidence*100).toFixed(0)}% | RSI: ${rsi.toFixed(1)} | ⏱️ Executando em breve...`;
+        indicator.style.display = "block";
+        
+        setTimeout(() => {
+            if (indicator && robotEnabled) {
+                indicator.style.display = "none";
+            }
+        }, 4000);
+    }
+    
+    // ============================================
+    // ANÁLISE TÉCNICA - COMPRA E VENDA AUTOMÁTICA
+    // ============================================
+    function analyzeAndTrade() {
+        // VERIFICAÇÕES CRÍTICAS
+        if (!robotEnabled) {
+            return;
+        }
+        if (!isConnected) {
+            log("⚠️ Sem conexão com a Deriv!", "loss");
+            return;
+        }
+        if (isProcessing) {
+            return;
+        }
+        if (priceHistory.length < 15) {
+            return;
+        }
+        
+        const now = Date.now();
+        // Aguarda 60 segundos entre operações (1 minuto)
+        const minInterval = 60000; // 1 MINUTO
+        if (now - lastTradeTime < minInterval) {
+            return;
+        }
+        
+        const prices = priceHistory.slice(-25);
+        const current = prices[prices.length - 1];
+        
+        // Médias Móveis
+        const sma5 = prices.slice(-5).reduce((a, b) => a + b, 0) / 5;
+        const sma10 = prices.slice(-10).reduce((a, b) => a + b, 0) / 10;
+        const sma20 = prices.slice(-20).reduce((a, b) => a + b, 0) / 20;
+        const momentum = current - prices[prices.length - 5];
+        
+        // RSI
+        let gains = 0, lossesSum = 0;
+        for (let i = prices.length - 14; i < prices.length; i++) {
+            const diff = prices[i] - prices[i-1];
+            if (diff >= 0) gains += diff;
+            else lossesSum -= diff;
+        }
+        const rsi = lossesSum === 0 ? 100 : 100 - (100 / (1 + ((gains / 14) / (lossesSum / 14))));
+        
+        // MACD
+        const ema12 = prices.slice(-12).reduce((a, b) => a + b, 0) / 12;
+        const ema26 = prices.slice(-26).reduce((a, b) => a + b, 0) / 26;
+        const macd = ema12 - ema26;
+        
+        let signal = null;
+        let confidence = 0;
+        
+        // CONDIÇÃO PARA COMPRA (CALL) - Tendência de alta
+        if (sma5 > sma10 && sma10 > sma20 && momentum > 0 && rsi > 35 && rsi < 70 && macd > -0.001) {
+            signal = "CALL";
+            confidence = 0.72 + (momentum / 200);
+            if (rsi > 45 && rsi < 60) confidence += 0.1;
+            if (macd > 0) confidence += 0.05;
+        }
+        // CONDIÇÃO PARA VENDA (PUT) - Tendência de baixa
+        else if (sma5 < sma10 && sma10 < sma20 && momentum < 0 && rsi > 30 && rsi < 65 && macd < 0.001) {
+            signal = "PUT";
+            confidence = 0.72 + (Math.abs(momentum) / 200);
+            if (rsi > 45 && rsi < 55) confidence += 0.05;
+            if (macd < 0) confidence += 0.05;
+        }
+        // REVERSÃO
+        else {
+            const prevMacd = (prices.slice(-6, -1).reduce((a, b) => a + b, 0) / 5) - (prices.slice(-11, -1).reduce((a, b) => a + b, 0) / 10);
+            
+            if (macd > prevMacd && macd < 0 && momentum > 0 && rsi < 60) {
+                signal = "CALL";
+                confidence = 0.68;
+            } else if (macd < prevMacd && macd > 0 && momentum < 0 && rsi > 40) {
+                signal = "PUT";
+                confidence = 0.68;
+            }
+        }
+        
+        confidence = Math.min(0.92, Math.max(0.65, confidence));
+        
+        // EXECUTA AUTOMATICAMENTE QUANDO DETECTA SINAL FORTE
+        if (signal && confidence >= 0.67) {
+            log(`📊 SINAL DETECTADO: ${signal === "CALL" ? "COMPRA 📈" : "VENDA 📉"} | Conf: ${(confidence*100).toFixed(0)}% | RSI: ${rsi.toFixed(1)}`, "signal");
+            showSignal(signal, confidence, rsi);
+            
+            // AGUARDA 2 SEGUNDOS E EXECUTA
+            setTimeout(() => {
+                if (robotEnabled && !isProcessing) {
+                    executeTrade(signal);
+                }
+            }, 2000);
+        }
+    }
+    
+    function executeTrade(signalType) {
+        // VERIFICAÇÕES FINAIS
+        if (!robotEnabled) {
+            log(`⚠️ Robô desligado, não executou ${signalType === "CALL" ? "COMPRA" : "VENDA"}`, "loss");
+            return;
+        }
+        if (!isConnected) {
+            log(`❌ Sem conexão, não executou ${signalType === "CALL" ? "COMPRA" : "VENDA"}`, "loss");
+            return;
+        }
+        if (isProcessing) {
+            log(`⏳ Processando operação anterior...`, "info");
+            return;
+        }
+        
+        const currentBalance = initialBalance + totalProfit;
+        if (stake > currentBalance) {
+            log(`❌ Saldo insuficiente: $${currentBalance.toFixed(2)}`, "loss");
+            disableRobot();
+            return;
+        }
+        
+        isProcessing = true;
+        const tradeType = signalType === "CALL" ? "COMPRA 📈" : "VENDA 📉";
+        log(`🚀 EXECUTANDO ${tradeType} | $${stake} | Duração: ${durationDisplay}`, "trade");
+        
+        const request = {
+            proposal: 1,
+            amount: stake,
+            basis: "stake",
+            contract_type: signalType,
+            currency: "USD",
+            duration: durationValue,
+            duration_unit: durationUnit,
+            symbol: symbol
+        };
+        
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(request));
+            lastTradeTime = Date.now();
+            log(`✅ Ordem enviada para a Deriv! Aguardando confirmação...`, "win");
+        } else {
+            log(`❌ WebSocket desconectado!`, "loss");
+            isProcessing = false;
+        }
+    }
+    
+    // ============================================
+    // WEBSOCKET - CONEXÃO COM A DERIV
+    // ============================================
+    function subscribeTicks() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify({ ticks: symbol, subscribe: 1 }));
+        log(`📡 Monitorando ${symbol} em tempo real | ${durationDisplay}`, "info");
+    }
+    
+    function getBalance() {
+        if (ws && ws.readyState === WebSocket.OPEN && isConnected) {
+            ws.send(JSON.stringify({ balance: 1 }));
+        }
+    }
+    
+    function updatePriceChart(tick) {
+        if (!priceChart) return;
+        
+        const chartData = priceChart.data.datasets[1].data;
+        chartData.push(tick);
+        if (chartData.length > 80) chartData.shift();
+        
+        priceChart.data.labels = chartData.map((_, i) => i);
+        priceChart.update();
+        
+        $("current-price-val").innerHTML = tick.toFixed(4);
+        
+        if (priceHistory.length >= 2) {
+            const change = tick - priceHistory[priceHistory.length - 2];
+            const changePercent = (change / priceHistory[priceHistory.length - 2] * 100).toFixed(2);
+            $("price-change-val").innerHTML = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(4)} (${change >= 0 ? '+' : ''}${changePercent}%)`;
+            $("price-change-val").style.color = change >= 0 ? "#2ecc71" : "#e74c3c";
+        }
+    }
+    
+    function handleMessage(data) {
+        // AUTORIZAÇÃO
+        if (data.msg_type === "authorize") {
+            if (data.error) {
+                log(`❌ Erro de autorização: ${data.error.message}`, "loss");
+                $("conn-status").innerHTML = "Erro";
+                $("conn-led").className = "led-red";
+                isConnected = false;
+                return;
+            }
+            
+            balance = parseFloat(data.authorize.balance);
+            initialBalance = balance;
+            totalProfit = 0;
+            wins = 0;
+            losses = 0;
+            profitHistory = [0];
+            
+            const accountText = accountType === "real" ? "REAL 💰" : "DEMO 📊";
+            log(`✅ CONECTADO! Conta ${accountText}`, "win");
+            log(`💰 Saldo: $${balance.toFixed(2)}`, "win");
+            log(`🎯 Meta: ${TARGET_WINS} vitórias / ${TARGET_LOSS} derrota`, "win");
+            log(`⏱️ Operações a cada 1 MINUTO`, "win");
+            
+            isConnected = true;
+            $("conn-status").innerHTML = "Online";
+            $("conn-led").className = "led-green";
+            $("start-robot-btn").disabled = false;
+            $("stop-robot-btn").disabled = true;
+            
+            subscribeTicks();
+            getBalance();
+            return;
+        }
+        
+        // BALANCE
+        if (data.msg_type === "balance") {
+            if (data.balance && data.balance.balance !== undefined) {
+                const newBalance = parseFloat(data.balance.balance);
+                totalProfit = newBalance - initialBalance;
+                log(`💰 Saldo: $${newBalance.toFixed(2)} | Lucro: ${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`, totalProfit >= 0 ? "win" : "loss");
+                updateUI();
+            }
+            return;
+        }
+        
+        // TICK
+        if (data.msg_type === "tick") {
+            const tick = parseFloat(data.tick.quote);
+            priceHistory.push(tick);
+            if (priceHistory.length > 150) priceHistory.shift();
+            
+            updatePriceChart(tick);
+            
+            // ANALISA A CADA TICK
+            if (robotEnabled && !isProcessing) {
+                analyzeAndTrade();
+            }
+            return;
+        }
+        
+        // PROPOSTA
+        if (data.msg_type === "proposal") {
+            if (data.error) {
+                log(`❌ Proposta recusada: ${data.error.message}`, "loss");
+                isProcessing = false;
+                return;
+            }
+            
+            if (data.proposal && data.proposal.id) {
+                log(`📝 Proposta aceita! Executando compra...`, "info");
+                ws.send(JSON.stringify({ buy: data.proposal.id, price: round2(stake) }));
+            } else {
+                isProcessing = false;
+            }
+            return;
+        }
+        
+        // COMPRA EXECUTADA
+        if (data.msg_type === "buy") {
+            if (data.error) {
+                log(`❌ Falha na compra: ${data.error.message}`, "loss");
+                isProcessing = false;
+                return;
+            }
+            
+            const contractId = data.buy.contract_id;
+            activeContracts[contractId] = {
+                type: data.buy.contract_type,
+                amount: stake,
+                startTime: Date.now()
+            };
+            
+            log(`✅ ORDEM EXECUTADA COM SUCESSO! ID: ${contractId}`, "win");
+            log(`⏳ Aguardando resultado em ${durationDisplay}...`, "info");
+            
+            ws.send(JSON.stringify({ 
+                proposal_open_contract: 1, 
+                contract_id: contractId, 
+                subscribe: 1 
+            }));
+            
+            getBalance();
+            return;
+        }
+        
+        // RESULTADO DO CONTRATO
+        if (data.msg_type === "proposal_open_contract") {
+            const contractId = data.proposal_open_contract.contract_id;
+            if (!activeContracts[contractId]) return;
+            
+            if (data.proposal_open_contract.status === "sold") {
+                const payout = parseFloat(data.proposal_open_contract.profit) || 0;
+                const amountUsed = activeContracts[contractId].amount;
+                const tradeType = activeContracts[contractId].type;
+                
+                if (payout > 0) {
+                    wins++;
+                    totalProfit += payout;
+                    const multiplier = (payout / amountUsed).toFixed(1);
+                    log(`✅ WIN! +$${payout.toFixed(2)} (${multiplier}x)`, "win");
+                } else {
+                    losses++;
+                    totalProfit -= amountUsed;
+                    log(`❌ LOSS! -$${amountUsed.toFixed(2)}`, "loss");
+                }
+                
+                delete activeContracts[contractId];
+                updateUI();
+                getBalance();
+                isProcessing = false;
+                
+                if (wins >= TARGET_WINS) {
+                    log(`🎉 META DE ${TARGET_WINS} VITÓRIAS ATINGIDA!`, "win");
+                    disableRobot();
+                }
+                if (losses >= TARGET_LOSS && wins < TARGET_WINS) {
+                    log(`🛑 LIMITE DE ${TARGET_LOSS} DERROTA ATINGIDO!`, "loss");
+                    disableRobot();
+                }
+                
+                // Aguarda 2 segundos antes de próxima análise
+                setTimeout(() => {
+                    if (robotEnabled && !isProcessing) {
+                        analyzeAndTrade();
+                    }
+                }, 2000);
+            }
+            return;
+        }
+        
+        if (data.error) {
+            log(`⚠️ Erro: ${data.error.message}`, "loss");
+            return;
+        }
+    }
+    
+    function connectWebSocket() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.close();
+        }
+        
+        log("🔌 Conectando à plataforma Deriv...", "info");
+        $("conn-status").innerHTML = "Conectando";
+        $("conn-led").className = "led-yellow";
+        
+        ws = new WebSocket(DERIV_WS_URL);
+        
+        ws.onopen = () => {
+            log("🌐 Conexão estabelecida! Autorizando token...", "info");
+            ws.send(JSON.stringify({ authorize: token }));
+        };
+        
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                handleMessage(data);
+            } catch (error) {
+                console.error("Erro:", error);
+            }
+        };
+        
+        ws.onerror = (error) => {
+            log("❌ Erro de conexão WebSocket", "loss");
+        };
+        
+        ws.onclose = () => {
+            log("🔌 Conexão fechada", "loss");
+            isConnected = false;
+            $("conn-status").innerHTML = "Offline";
+            $("conn-led").className = "led-red";
+            $("start-robot-btn").disabled = true;
+            $("stop-robot-btn").disabled = true;
+            
+            if (robotEnabled) {
+                disableRobot();
+            }
+        };
+    }
+    
+    // ============================================
+    // CONTROLE DO ROBÔ
+    // ============================================
+    function connectAndSetup() {
+        token = $("api-token").value.trim();
+        if (!token) {
+            alert("❌ Cole seu token da API da Deriv!");
+            log("❌ Token não informado!", "loss");
+            return;
+        }
+        
+        stake = round2(parseFloat($("stake").value));
+        symbol = $("market").value;
+        
+        const durationSelect = $("duration").value;
+        switch(durationSelect) {
+            case "30s": durationValue = 30; durationUnit = "t"; durationDisplay = "30s"; break;
+            case "1m": durationValue = 1; durationUnit = "m"; durationDisplay = "1min"; break;
+            case "2m": durationValue = 2; durationUnit = "m"; durationDisplay = "2min"; break;
+            case "5m": durationValue = 5; durationUnit = "m"; durationDisplay = "5min"; break;
+            default: durationValue = 1; durationUnit = "m"; durationDisplay = "1min";
+        }
+        
+        if (stake < 0.5) {
+            alert("❌ Investimento mínimo: $0.50");
+            return;
+        }
+        
+        // Reset
+        wins = 0;
+        losses = 0;
+        totalProfit = 0;
+        priceHistory = [];
+        activeContracts = {};
+        profitHistory = [0];
+        isProcessing = false;
+        lastTradeTime = 0;
+        robotEnabled = false;
+        
+        const accountText = accountType === "real" ? "REAL" : "DEMO";
+        log(`🚀 Conectando conta ${accountText}...`, "info");
+        log(`💰 Investimento: $${stake} | Duração: ${durationDisplay}`, "info");
+        
+        connectWebSocket();
+    }
+    
+    function enableRobot() {
+        if (!isConnected) {
+            log("❌ Aguarde a conexão ser estabelecida primeiro!", "loss");
+            return;
+        }
+        
+        robotEnabled = true;
+        isProcessing = false;
+        lastTradeTime = 0;
+        
+        $("start-robot-btn").disabled = true;
+        $("stop-robot-btn").disabled = false;
+        $("trade-status").innerHTML = "Ligado";
+        $("trade-status").style.color = "#2ecc71";
+        $("robot-led").className = "led-green";
+        
+        log("🤖 ROBÔ LIGADO! Iniciando operações automáticas...", "win");
+        log("📊 O robô irá COMPRAR e VENDER automaticamente a cada 1 MINUTO!", "win");
+        log("🎯 Buscando sinais de alta confiança...", "info");
+        
+        if (priceHistory.length >= 15) {
+            setTimeout(() => analyzeAndTrade(), 1000);
+        }
+    }
+    
+    function disableRobot() {
+        robotEnabled = false;
+        isProcessing = false;
+        
+        $("start-robot-btn").disabled = false;
+        $("stop-robot-btn").disabled = true;
+        $("trade-status").innerHTML = "Parado";
+        $("trade-status").style.color = "#fff";
+        $("robot-led").className = "led-red";
+        
+        const indicator = $("signal-indicator");
+        if (indicator) indicator.style.display = "none";
+        
+        log("⏸ ROBÔ DESLIGADO! Operações pausadas.", "loss");
+    }
+    
+    // ============================================
+    // INICIALIZAR GRÁFICO
+    // ============================================
+    function initChart() {
+        const ctx = document.getElementById('deriv-chart').getContext('2d');
+        
+        priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: '💰 LUCRO/PREJUÍZO (USD)',
+                        data: [0],
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.15)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '📊 PREÇO DO ATIVO',
+                        data: [],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.05)',
+                        borderWidth: 1.5,
+                        fill: false,
+                        tension: 0.1,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { 
+                        labels: { color: '#ffffff', font: { size: 10 } },
+                        position: 'top'
+                    },
+                    tooltip: { 
+                        callbacks: { 
+                            label: (ctx) => {
+                                if (ctx.dataset.label === '📊 PREÇO DO ATIVO') {
+                                    return `${ctx.dataset.label}: ${ctx.raw.toFixed(4)}`;
+                                }
+                                return `${ctx.dataset.label}: $${ctx.raw.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        position: 'left',
+                        title: { display: true, text: 'Lucro (USD)', color: '#2ecc71', font: { size: 9 } },
+                        grid: { color: 'rgba(46, 204, 113, 0.1)' },
+                        ticks: { color: '#ffffff', callback: (v) => `$${v}`, font: { size: 9 } }
+                    },
+                    y1: {
+                        position: 'right',
+                        title: { display: true, text: 'Preço', color: '#3498db', font: { size: 9 } },
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#ffffff', font: { size: 9 } }
+                    },
+                    x: {
+                        ticks: { display: false, color: '#ffffff' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+    
+    // ============================================
+    // EVENTOS E INICIALIZAÇÃO
+    // ============================================
+    $("demo-btn").onclick = () => {
+        accountType = "demo";
+        $("demo-btn").classList.add("active");
+        $("real-btn").classList.remove("active");
+        log("📊 Modo DEMO selecionado", "info");
+    };
+    
+    $("real-btn").onclick = () => {
+        accountType = "real";
+        $("real-btn").classList.add("active");
+        $("demo-btn").classList.remove("active");
+        log("💰 Modo REAL selecionado - Cuidado! Dinheiro real!", "loss");
+    };
+    
+    $("connect-btn").onclick = connectAndSetup;
+    $("start-robot-btn").onclick = enableRobot;
+    $("stop-robot-btn").onclick = disableRobot;
+    
+    initChart();
+    
+    // Loop de segurança para análise contínua
+    setInterval(() => {
+        if (isConnected && robotEnabled && !isProcessing && priceHistory.length >= 15) {
+            const now = Date.now();
+            if (now - lastTradeTime >= 60000) { // 1 MINUTO
+                analyzeAndTrade();
+            }
+        }
+        if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
+            getBalance();
+        }
+    }, 5000);
+</script>
+</body>
+</html>
